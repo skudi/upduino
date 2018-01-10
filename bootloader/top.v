@@ -1,28 +1,10 @@
 module top (
   inout pin1_usb_dp,
   inout pin2_usb_dn,
-  input pin3_clk_16mhz,
-  inout pin4,
-  inout pin5,
-  inout pin6,
-  inout pin7,
-  inout pin8,
-  inout pin9,
-  inout pin10,
-  inout pin11,
-  inout pin12,
-  inout pin13,
   inout pin14_sdo,
   inout pin15_sdi,
   inout pin16_sck,
-  inout pin17_ss,
-  inout pin18,
-  inout pin19,
-  inout pin20,
-  inout pin21,
-  inout pin22,
-  inout pin23,
-  inout pin24
+  inout pin17_ss
 );
   wire clk_48mhz;
 
@@ -40,35 +22,7 @@ module top (
   ////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////
 
-  SB_PLL40_CORE usb_pll_inst (
-    .REFERENCECLK(pin3_clk_16mhz),
-    .PLLOUTCORE(clk_48mhz),
-    .PLLOUTGLOBAL(),
-    .EXTFEEDBACK(),
-    .DYNAMICDELAY(),
-    .RESETB(1),
-    .BYPASS(1'b0),
-    .LATCHINPUTVALUE(),
-    .LOCK(),
-    .SDI(),
-    .SDO(),
-    .SCLK()
-  );
-
-  // Fin=16, Fout=48;
-  defparam usb_pll_inst.DIVR = 4'b0000;
-  defparam usb_pll_inst.DIVF = 7'b0101111;
-  defparam usb_pll_inst.DIVQ = 3'b100;
-  defparam usb_pll_inst.FILTER_RANGE = 3'b001;
-  defparam usb_pll_inst.FEEDBACK_PATH = "SIMPLE";
-  defparam usb_pll_inst.DELAY_ADJUSTMENT_MODE_FEEDBACK = "FIXED";
-  defparam usb_pll_inst.FDA_FEEDBACK = 4'b0000;
-  defparam usb_pll_inst.DELAY_ADJUSTMENT_MODE_RELATIVE = "FIXED";
-  defparam usb_pll_inst.FDA_RELATIVE = 4'b0000;
-  defparam usb_pll_inst.SHIFTREG_DIV_MODE = 2'b00;
-  defparam usb_pll_inst.PLLOUT_SELECT = "GENCLK";
-  defparam usb_pll_inst.ENABLE_ICEGATE = 1'b0;
-
+  SB_HFOSC  u_SB_HFOSC(.CLKHFPU(1'b1), .CLKHFEN(1'b1), .CLKHF(clk_48mhz));
 
   ////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////
