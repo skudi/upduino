@@ -4,7 +4,7 @@ Version=Lattice Semiconductor Corporation iCEcube - Release: 2017.08.27940 - Bui
 ProjectName=bootloader
 Vendor=SiliconBlue
 Synthesis=synplify
-ProjectVFiles=
+ProjectVFiles=edge_detect.v=work,usb_fs_in_arb.v=work,usb_fs_in_pe.v=work,usb_fs_mux.v=work,usb_fs_out_arb.v=work,usb_fs_out_pe.v=work,usb_fs_pe.v=work,usb_fs_rx.v=work,usb_fs_tx.v=work,usb_fs_tx_mux.v=work,usb_serial_ctrl_ep.v=work,usb_spi_bridge_ep.v=work,top.v=work
 ProjectCFiles=
 CurImplementation=bootloader_Implmnt
 Implementations=bootloader_Implmnt
