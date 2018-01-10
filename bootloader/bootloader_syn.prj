@@ -2,6 +2,19 @@
 #-- Project file /mnt/dane/src/fpga/upduino/bootloader/bootloader_syn.prj
 #project files
 
+add_file -verilog -lib work "edge_detect.v" 
+add_file -verilog -lib work "usb_fs_in_arb.v" 
+add_file -verilog -lib work "usb_fs_in_pe.v" 
+add_file -verilog -lib work "usb_fs_mux.v" 
+add_file -verilog -lib work "usb_fs_out_arb.v" 
+add_file -verilog -lib work "usb_fs_out_pe.v" 
+add_file -verilog -lib work "usb_fs_pe.v" 
+add_file -verilog -lib work "usb_fs_rx.v" 
+add_file -verilog -lib work "usb_fs_tx.v" 
+add_file -verilog -lib work "usb_fs_tx_mux.v" 
+add_file -verilog -lib work "usb_serial_ctrl_ep.v" 
+add_file -verilog -lib work "usb_spi_bridge_ep.v" 
+add_file -verilog -lib work "top.v" 
 #implementation: "bootloader_Implmnt"
 impl -add bootloader_Implmnt -type fpga
 
@@ -51,5 +64,5 @@ set_option -write_apr_constraint 1
 project -result_format "edif"
 project -result_file ./bootloader_Implmnt/bootloader.edf
 project -log_file "./bootloader_Implmnt/bootloader.srr"
-impl -active "bootloader_Implmnt"
+impl -active bootloader_Implmnt
 project -run synthesis -clean
