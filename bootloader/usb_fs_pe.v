@@ -1,6 +1,6 @@
 module usb_fs_pe #(
-  NUM_OUT_EPS = 1,
-  NUM_IN_EPS = 1
+  parameter NUM_OUT_EPS = 1,
+  parameter NUM_IN_EPS = 1
 ) (
   input clk,
   input [6:0] dev_addr,
