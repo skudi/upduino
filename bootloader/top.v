@@ -84,8 +84,8 @@ module top (
   wire reset;
 
   SB_WARMBOOT warmboot_inst (
-    .S1(0),
-    .S0(1),
+    .S1(1'b0),
+    .S0(1'b1),
     .BOOT(host_presence_timeout || boot_to_user_design)
   );
 
