@@ -3,4 +3,7 @@
 *_Implmnt
 *.bak
 *.blif
+*.asc
+*.bin
+*.rpt
 synlog.tcl
