@@ -4,7 +4,10 @@ module top (
   inout pin14_sdo,
   inout pin15_sdi,
   inout pin16_sck,
-  inout pin17_ss
+  inout pin17_ss,
+  output  wire        REDn,       // Red
+  output  wire        BLUn,       // Blue
+  output  wire        GRNn        // Green
 );
   wire clk_48mhz;
 
@@ -24,6 +27,24 @@ module top (
 
   SB_HFOSC  u_SB_HFOSC(.CLKHFPU(1'b1), .CLKHFEN(1'b1), .CLKHF(clk_48mhz));
 
+	//----------------------------------------------------------------------------
+	//                                                                          --
+	//                       Instantiate RGB primitive                          --
+	//                                                                          --
+	//----------------------------------------------------------------------------
+	SB_RGBA_DRV RGB_DRIVER ( 
+		.RGBLEDEN (1'b1),
+		.RGB0PWM  (1'b1),
+		.RGB1PWM  (1'b0),
+		.RGB2PWM  (1'b0),
+		.CURREN   (1'b1), 
+		.RGB0     (REDn),		//Actual Hardware connection
+		.RGB1     (GRNn),
+		.RGB2     (BLUn)
+	);
+	defparam RGB_DRIVER.RGB0_CURRENT = "0b000001";
+	defparam RGB_DRIVER.RGB1_CURRENT = "0b000001";
+	defparam RGB_DRIVER.RGB2_CURRENT = "0b000001";
   ////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////
   ////////
