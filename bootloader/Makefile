@@ -27,6 +27,7 @@ DEVICE_PACKAGE=sg48
 
 SHELL := /bin/bash
 
+ARACHNE_OPTS = -l
 
 all: $(TOP_MODULE).rpt $(TOP_MODULE).bin
 
@@ -34,7 +35,7 @@ all: $(TOP_MODULE).rpt $(TOP_MODULE).bin
 	yosys -p 'synth_ice40 -top $(TOP_MODULE) -blif $@' $^
 
 %.asc: $(PIN_DEF) %.blif
-	arachne-pnr -d $(DEVICE) -P $(DEVICE_PACKAGE) -o $@ -p $^
+	arachne-pnr $(ARACHNE_OPTS) -d $(DEVICE) -P $(DEVICE_PACKAGE) -o $@ --post-place-blif $(TOP_MODULE).pp.blif -p $^
 
 %.bin: %.asc
 	icepack $< $@
