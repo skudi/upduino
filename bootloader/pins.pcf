@@ -16,8 +16,8 @@ set_io pin14_sdo 14
 set_io pin15_sdi 17
 set_io pin16_sck 15
 set_io pin17_ss 16
-set_io pin1_usb_dp 27
-set_io pin2_usb_dn 26
+set_io pin1_usb_dp 37
+set_io pin2_usb_dn 34
 
 set_io REDn 39
 set_io GRNn 40
