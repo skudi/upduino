@@ -11,6 +11,8 @@ def main():
     parser.add_argument("-l", "--list", action="store_true",
                         help="list connected and active TinyFPGA B-series "
                              "boards")
+    parser.add_argument("-r", "--read", type=str,
+                        help="read flash content and store to file")
     parser.add_argument("-p", "--program", type=str,
                         help="program TinyFPGA board with the given bitstream")
     parser.add_argument("-b", "--boot", action="store_true",
@@ -39,6 +41,10 @@ def main():
     print "    Using device id {}".format(device)
     active_boards = [p[0] for p in comports() if device in p[2]]
 
+    fpga = None
+    flashsize = 0x400000
+    maxattempts = 4 # max number of attempts to read or write sector
+
     # find port to use
     active_port = None
     if args.com is not None:
@@ -61,56 +67,66 @@ def main():
         if len(active_boards) == 0:
             print "        No active bootloaders found.  Check USB connections"
             print "        and press reset button to activate bootloader."
+    else:
+        ser = serial.Serial(active_port, 115200, timeout=0.2,
+                           writeTimeout=0.2)
+        fpga = TinyFPGAB(ser)
 
     # flash memory operations
-    elif args.program is not None or args.flashinfo:
-        def progress(info):
-            if isinstance(info, str):
-                print "    " + info
+    if args.program is not None:
+        for attempt in range(maxattempts):
+            print "    Programming " + active_port + " with " + args.program
+            (addr, bitstream) = fpga.slurp(args.program)
+            if args.addr is not None:
+                addr = args.addr
+            if addr < 0:
+                print "    Negative write addr: {}".format(addr)
+                sys.exit(1)
+            if addr + len(bitstream) >= flashsize:
+                print "    Write addr over 4Mio: {}".format(addr)
+                sys.exit(1)
+            if not fpga.is_bootloader_active():
+                print "    Bootloader not active"
+                continue
+            print "    Programming at addr {:06x}".format(addr)
+            if fpga.program_bitstream(addr, bitstream):
+                sys.exit(0)
+            else:
+                continue
 
-        for attempt in range(3):
-            with serial.Serial(active_port, 115200, timeout=0.2,
-                               writeTimeout=0.2) as ser:
-                fpga = TinyFPGAB(ser, progress)
-                if args.flashinfo:
-                    print "    Checking flash at " + active_port
-                    flash_id_str = fpga.read_id()
-                    if len(flash_id_str) != 3:
-                        flash_id_str = '\x00\x00\x00'
-                    #flash_id_str = '\x1f\x84\x01'
-                    flash_id = struct.unpack(">I", '\x00' + flash_id_str)[0]
-                    flash_stat = struct.unpack("B", fpga.read_sts())[0]
-                    print "    Flash Id: [{:d}/0x{:06x}]".format(flash_id, flash_id)
-                    print "    Flash Status: [0x{:02x}]".format(flash_stat)
-                    sys.exit(0)
+    if args.read is not None:
+        print "    Reading flash at " + active_port
+        pagesize = 4096
+        file = open (args.read, "wb")
+        for page in range(flashsize / pagesize):
+            for repeat in range(maxattempts):
+                print "reading page {:d}: {:08x}".format(page, page * pagesize)
+                bitstream = fpga.read(page * pagesize, pagesize)
+                if len(bitstream) == pagesize:
+                    break
+            if len(bitstream) != pagesize:
+                print "shredded page {:d} after {:d} attempts".format(page, maxattempts)
+                sys.exit(1)
+            file.write(bitstream)
+        file.close()
+        
 
-                else:
-                    print "    Programming " + active_port + " with " + args.program
-                    (addr, bitstream) = fpga.slurp(args.program)
-                    if args.addr is not None:
-                        addr = args.addr
-                    if addr < 0:
-                        print "    Negative write addr: {}".format(addr)
-                        sys.exit(1)
-                    if addr + len(bitstream) >= 0x400000:
-                        print "    Write addr over 4Mio: {}".format(addr)
-                        sys.exit(1)
-                    if not fpga.is_bootloader_active():
-                        print "    Bootloader not active"
-                        continue
-                    print "    Programming at addr {:06x}".format(addr)
-                    if fpga.program_bitstream(addr, bitstream):
-                        sys.exit(0)
-                    else:
-                        continue
+    if args.flashinfo:
+        print "    Checking flash at " + active_port
+        flash_id_str = fpga.read_id()
+        if len(flash_id_str) != 3:
+            flash_id_str = '\x00\x00\x00'
+        #flash_id_str = '\x1f\x84\x01'
+        flash_id = struct.unpack(">I", '\x00' + flash_id_str)[0]
+        flash_stat = struct.unpack("B", fpga.read_sts())[0]
+        print "    Flash Id: [{:d}/0x{:06x}]".format(flash_id, flash_id)
+        print "    Flash Status: [0x{:02x}]".format(flash_stat)
+        sys.exit(0)
 
     # boot the FPGA
     if args.boot:
         print "    Booting " + active_port
-        with serial.Serial(active_port, 115200, timeout=0.2,
-                           writeTimeout=0.2) as ser:
-            fpga = TinyFPGAB(ser)
-            fpga.boot()
+        fpga.boot()
 
 if __name__ == '__main__':
     main()
